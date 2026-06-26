@@ -1,0 +1,29 @@
+image: eclipse-temurin:25-jdk
+variables:
+  GRADLE_USER_HOME: "${CI_PROJECT_DIR}/.gradle"
+cache:
+  key:
+    files:
+      - build.gradle.kts
+      - settings.gradle.kts
+  paths:
+    - .gradle/
+    - build/
+  policy: pull-push
+stages:
+  - build
+build:
+  stage: build
+  script:
+    - |
+      echo "Build the project"
+      chmod +x ./gradlew
+      ./gradlew clean build
+      echo "Copy the generated JAR files to the root directory for artifact collection"
+      cp build/libs/*.jar ./
+  artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - "*.jar"
+    expire_in: 7 days
+    when: always
